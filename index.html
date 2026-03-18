@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -47,7 +48,87 @@
       padding: 16px 40px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 6px;
+      padding: 8px 16px;
+      color: #FFFFFF;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .82rem;
+      font-weight: 500;
+      letter-spacing: .03em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s ease, border-color .2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .login-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.7);
+    }
+
+    .login-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.8);
+      letter-spacing: .02em;
+    }
+
+    .staff-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: var(--crimson);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .2s ease;
+      white-space: nowrap;
+    }
+
+    .staff-link:hover { opacity: .85; }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      padding: 6px 12px;
+      color: rgba(255,255,255,0.7);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+
+    .logout-btn:hover { color: #fff; border-color: rgba(255,255,255,0.7); }
 
     .wordmark {
       display: flex;
@@ -265,9 +346,14 @@
 
     @media (max-width: 600px) {
       .brand-header { padding: 0; }
-      .brand-header-inner { padding: 16px 20px; justify-content: center; }
+      .brand-header-inner { padding: 12px 20px; justify-content: space-between; }
+      .wordmark-img { height: 48px; margin-left: 0; }
       .brand-tagline { display: none; }
-      .wordmark-img { margin-left: 0; }
+      .login-btn { padding: 6px 10px; font-size: .75rem; }
+      .login-btn svg { width: 13px; height: 13px; }
+      .user-name { display: none; }
+      .staff-link { padding: 6px 10px; font-size: .75rem; }
+      .logout-btn { padding: 5px 8px; font-size: .7rem; }
       header, .divider, main { padding-left: 20px; padding-right: 20px; }
       header { padding-top: 32px; padding-bottom: 24px; text-align: center; }
       .page-header-row { flex-direction: column; gap: 8px; align-items: center; }
@@ -286,9 +372,65 @@
     <a class="wordmark" href="#">
       <img src="logo-banner.png" alt="Summit Brooke Construction" class="wordmark-img" />
     </a>
-
+    <div id="auth-area">
+      <!-- Populated by MSAL script below -->
+    </div>
   </div>
 </div>
+
+<script>
+const msalConfig = {
+  auth: {
+    clientId: "31222743-caaf-40fd-beed-a275005e6410",
+    authority: "https://login.microsoftonline.com/b90943ff-b2d4-4696-aa4e-3b4f27136ca9",
+    redirectUri: "https://brookmere.summitbrooke.com",
+  },
+  cache: { cacheLocation: "sessionStorage" }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+async function initAuth() {
+  await msalInstance.handleRedirectPromise();
+  const accounts = msalInstance.getAllAccounts();
+  const area = document.getElementById('auth-area');
+
+  if (accounts.length > 0) {
+    const name = accounts[0].name || accounts[0].username;
+    const firstName = name.split(' ')[0];
+    area.innerHTML = `
+      <div class="user-info">
+        <span class="user-name">Hi, ${firstName}</span>
+        <a class="staff-link" href="staff.html">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 3v4m0 2h.01"/></svg>
+          Staff Portal
+        </a>
+        <button class="logout-btn" onclick="signOut()">Sign out</button>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <button class="login-btn" onclick="signIn()">
+        <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/>
+          <rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/>
+          <rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/>
+          <rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/>
+        </svg>
+        Employee Login
+      </button>`;
+  }
+}
+
+function signIn() {
+  msalInstance.loginRedirect({ scopes: ["User.Read"] });
+}
+
+function signOut() {
+  msalInstance.logoutRedirect();
+}
+
+initAuth();
+</script>
 
 <!-- Page intro -->
 <header>
