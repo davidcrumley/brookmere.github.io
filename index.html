@@ -59,6 +59,7 @@
       height: 72px;
       width: auto;
       display: block;
+      margin-left: -10px;
     }
 
     .brand-tagline {
@@ -263,10 +264,14 @@
     }
 
     @media (max-width: 600px) {
-      .brand-header { padding: 0 20px; }
+      .brand-header { padding: 0; }
+      .brand-header-inner { padding: 16px 20px; }
       .brand-tagline { display: none; }
+      .wordmark-img { margin-left: -8px; }
       header, .divider, main { padding-left: 20px; padding-right: 20px; }
       header { padding-top: 32px; padding-bottom: 24px; }
+      .page-header-row { flex-direction: column; gap: 6px; align-items: flex-start; }
+      .project-label { font-size: .95rem; }
       .grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -297,7 +302,7 @@
 <main>
   <div class="grid">
 
-    <a class="card" href="https://forms.summitbrooke.com/flha?project=Brookmere%20Gardens" target="_blank">
+    <a class="card" href="https://forms.summitbrooke.com/flha?project=Brookmere" target="_blank">
       <span class="card-badge">
         <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 1a5 5 0 1 0 0 10A5 5 0 0 0 6 1Zm.5 7.5h-1v-4h1v4Zm0-5h-1v-1h1v1Z"/></svg>
         Safety
