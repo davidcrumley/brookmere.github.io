@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -379,57 +379,59 @@
 </div>
 
 <script>
-const msalConfig = {
-  auth: {
-    clientId: "31222743-caaf-40fd-beed-a275005e6410",
-    authority: "https://login.microsoftonline.com/b90943ff-b2d4-4696-aa4e-3b4f27136ca9",
-    redirectUri: "https://brookmere.summitbrooke.com",
-  },
-  cache: { cacheLocation: "sessionStorage" }
-};
+document.addEventListener('DOMContentLoaded', function() {
+  const msalConfig = {
+    auth: {
+      clientId: "31222743-caaf-40fd-beed-a275005e6410",
+      authority: "https://login.microsoftonline.com/b90943ff-b2d4-4696-aa4e-3b4f27136ca9",
+      redirectUri: "https://brookmere.summitbrooke.com",
+    },
+    cache: { cacheLocation: "sessionStorage" }
+  };
 
-const msalInstance = new msal.PublicClientApplication(msalConfig);
+  const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-async function initAuth() {
-  await msalInstance.handleRedirectPromise();
-  const accounts = msalInstance.getAllAccounts();
-  const area = document.getElementById('auth-area');
+  async function initAuth() {
+    await msalInstance.handleRedirectPromise();
+    const accounts = msalInstance.getAllAccounts();
+    const area = document.getElementById('auth-area');
 
-  if (accounts.length > 0) {
-    const name = accounts[0].name || accounts[0].username;
-    const firstName = name.split(' ')[0];
-    area.innerHTML = `
-      <div class="user-info">
-        <span class="user-name">Hi, ${firstName}</span>
-        <a class="staff-link" href="staff.html">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 3v4m0 2h.01"/></svg>
-          Staff Portal
-        </a>
-        <button class="logout-btn" onclick="signOut()">Sign out</button>
-      </div>`;
-  } else {
-    area.innerHTML = `
-      <button class="login-btn" onclick="signIn()">
-        <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/>
-          <rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/>
-          <rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/>
-          <rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/>
-        </svg>
-        Employee Login
-      </button>`;
+    if (accounts.length > 0) {
+      const name = accounts[0].name || accounts[0].username;
+      const firstName = name.split(' ')[0];
+      area.innerHTML = `
+        <div class="user-info">
+          <span class="user-name">Hi, ${firstName}</span>
+          <a class="staff-link" href="staff.html">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 3v4m0 2h.01"/></svg>
+            Staff Portal
+          </a>
+          <button class="logout-btn" onclick="signOut()">Sign out</button>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <button class="login-btn" onclick="signIn()">
+          <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="6.5" height="6.5" fill="#f25022"/>
+            <rect x="8.5" y="1" width="6.5" height="6.5" fill="#7fba00"/>
+            <rect x="1" y="8.5" width="6.5" height="6.5" fill="#00a4ef"/>
+            <rect x="8.5" y="8.5" width="6.5" height="6.5" fill="#ffb900"/>
+          </svg>
+          Employee Login
+        </button>`;
+    }
   }
-}
 
-function signIn() {
-  msalInstance.loginRedirect({ scopes: ["User.Read"] });
-}
+  window.signIn = function() {
+    msalInstance.loginRedirect({ scopes: ["User.Read"] });
+  };
 
-function signOut() {
-  msalInstance.logoutRedirect();
-}
+  window.signOut = function() {
+    msalInstance.logoutRedirect();
+  };
 
-initAuth();
+  initAuth();
+});
 </script>
 
 <!-- Page intro -->
