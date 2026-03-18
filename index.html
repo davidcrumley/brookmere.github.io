@@ -384,7 +384,7 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 <script>
 const msalConfig = {
   auth: {
@@ -397,45 +397,41 @@ const msalConfig = {
 
 const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-async function initAuth() {
+// Store the initialisation promise so signIn() can await it
+const msalReady = msalInstance.initialize().then(() => {
+  return msalInstance.handleRedirectPromise();
+}).then((response) => {
+  const accounts = msalInstance.getAllAccounts();
+  const area = document.getElementById('auth-area');
+  if (accounts.length > 0) {
+    const name = accounts[0].name || accounts[0].username;
+    const firstName = name.split(' ')[0];
+    area.innerHTML = `
+      <div class="user-info">
+        <span class="user-name">Hi, ${firstName}</span>
+        <a class="staff-link" href="staff.html">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 3v4m0 2h.01"/></svg>
+          Staff Portal
+        </a>
+        <button class="logout-btn" onclick="signOut()">Sign out</button>
+      </div>`;
+  }
+  // If not logged in, hardcoded button stays visible
+}).catch(e => console.warn('MSAL init error:', e));
+
+async function signIn() {
   try {
-    await msalInstance.handleRedirectPromise();
-    const accounts = msalInstance.getAllAccounts();
-    const area = document.getElementById('auth-area');
-
-    if (accounts.length > 0) {
-      const name = accounts[0].name || accounts[0].username;
-      const firstName = name.split(' ')[0];
-      area.innerHTML = `
-        <div class="user-info">
-          <span class="user-name">Hi, ${firstName}</span>
-          <a class="staff-link" href="staff.html">
-            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 3v4m0 2h.01"/></svg>
-            Staff Portal
-          </a>
-          <button class="logout-btn" onclick="signOut()">Sign out</button>
-        </div>`;
-    }
-    // If not logged in, the default button already shown in HTML stays as-is
+    await msalReady;
+    await msalInstance.loginRedirect({ scopes: ["User.Read"] });
   } catch(e) {
-    console.warn('MSAL init error:', e);
-    // Button already visible in HTML — signIn() will be available once MSAL loads
+    console.warn('Login error:', e);
   }
 }
 
-function signIn() {
-  if (typeof msal === 'undefined') {
-    alert('Authentication service is still loading. Please try again in a moment.');
-    return;
-  }
-  msalInstance.loginRedirect({ scopes: ["User.Read"] });
-}
-
-function signOut() {
+async function signOut() {
+  await msalReady;
   msalInstance.logoutRedirect();
 }
-
-initAuth();
 </script>
 
 <!-- Page intro -->

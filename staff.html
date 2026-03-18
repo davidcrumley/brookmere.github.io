@@ -544,7 +544,7 @@
 
 </div><!-- end page-content -->
 
-<script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 <script>
 const msalConfig = {
   auth: {
@@ -557,29 +557,26 @@ const msalConfig = {
 
 const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-async function initAuth() {
-  await msalInstance.handleRedirectPromise();
+msalInstance.initialize().then(() => {
+  return msalInstance.handleRedirectPromise();
+}).then(() => {
   const accounts = msalInstance.getAllAccounts();
-
   if (accounts.length === 0) {
     msalInstance.loginRedirect({ scopes: ["User.Read"] });
     return;
   }
-
   const name = accounts[0].name || accounts[0].username;
   document.getElementById('user-display-name').textContent = `Hi, ${name.split(' ')[0]}`;
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('page-content').style.display = 'flex';
   document.getElementById('page-content').style.flexDirection = 'column';
-}
+}).catch(e => console.warn('MSAL error:', e));
 
 function signOut() {
   msalInstance.logoutRedirect({
     postLogoutRedirectUri: "https://brookmere.summitbrooke.com"
   });
 }
-
-initAuth();
 </script>
 
 </body>
