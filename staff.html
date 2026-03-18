@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -545,43 +544,42 @@
 
 </div><!-- end page-content -->
 
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const msalConfig = {
-    auth: {
-      clientId: "31222743-caaf-40fd-beed-a275005e6410",
-      authority: "https://login.microsoftonline.com/b90943ff-b2d4-4696-aa4e-3b4f27136ca9",
-      redirectUri: "https://brookmere.summitbrooke.com/staff.html",
-    },
-    cache: { cacheLocation: "sessionStorage" }
-  };
+const msalConfig = {
+  auth: {
+    clientId: "31222743-caaf-40fd-beed-a275005e6410",
+    authority: "https://login.microsoftonline.com/b90943ff-b2d4-4696-aa4e-3b4f27136ca9",
+    redirectUri: "https://brookmere.summitbrooke.com/staff.html",
+  },
+  cache: { cacheLocation: "sessionStorage" }
+};
 
-  const msalInstance = new msal.PublicClientApplication(msalConfig);
+const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-  async function initAuth() {
-    await msalInstance.handleRedirectPromise();
-    const accounts = msalInstance.getAllAccounts();
+async function initAuth() {
+  await msalInstance.handleRedirectPromise();
+  const accounts = msalInstance.getAllAccounts();
 
-    if (accounts.length === 0) {
-      msalInstance.loginRedirect({ scopes: ["User.Read"] });
-      return;
-    }
-
-    const name = accounts[0].name || accounts[0].username;
-    document.getElementById('user-display-name').textContent = `Hi, ${name.split(' ')[0]}`;
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('page-content').style.display = 'flex';
-    document.getElementById('page-content').style.flexDirection = 'column';
+  if (accounts.length === 0) {
+    msalInstance.loginRedirect({ scopes: ["User.Read"] });
+    return;
   }
 
-  window.signOut = function() {
-    msalInstance.logoutRedirect({
-      postLogoutRedirectUri: "https://brookmere.summitbrooke.com"
-    });
-  };
+  const name = accounts[0].name || accounts[0].username;
+  document.getElementById('user-display-name').textContent = `Hi, ${name.split(' ')[0]}`;
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('page-content').style.display = 'flex';
+  document.getElementById('page-content').style.flexDirection = 'column';
+}
 
-  initAuth();
-});
+function signOut() {
+  msalInstance.logoutRedirect({
+    postLogoutRedirectUri: "https://brookmere.summitbrooke.com"
+  });
+}
+
+initAuth();
 </script>
 
 </body>
